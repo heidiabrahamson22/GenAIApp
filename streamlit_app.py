@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 import json
 from langchain.schema import Document
 import os
+from langchain.vectorstores import Chroma
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 import streamlit as st
@@ -131,43 +132,64 @@ st.title("University of Chicago MSADS Chatbot")
 # User input for OpenAI API Key
 openai_api_key = st.sidebar.text_input("Enter your OpenAI API Key", type="password")
 
+# Check if the API key is provided before proceeding
 if openai_api_key:
+    # Initialize embedding model with the provided API key
     embedding_model = OpenAIEmbeddings(openai_api_key=openai_api_key)
-    vector_store = {}
 
-    def add_documents_to_store(documents, embedding_model):
-        for doc in documents:
-            vector = embedding_model.embed_query(doc.page_content)
-            vector_store[doc.metadata["title"]] = {"vector": vector, "content": doc.page_content}
+    # Use embedding model with FAISS
+    vector_store = Chroma.from_documents(documents, embedding_model)
 
-    # Add documents to the vector store
-    add_documents_to_store(documents, embedding_model)
+    # Initialize text splitter
+    text_splitter = RecursiveCharacterTextSplitter(
+        chunk_size=1000,
+        chunk_overlap=100
+    )
 
-    # Simple retrieval function to find the top k most similar documents
-    def retrieve_similar_documents(query, k=3):
-        query_vector = embedding_model.embed_query(query)
-        similarities = []
-        for title, data in vector_store.items():
-            similarity = np.dot(query_vector, data["vector"])
-            similarities.append((title, data["content"], similarity))
-        sorted_docs = sorted(similarities, key=lambda x: x[2], reverse=True)[:k]
-        return [doc[1] for doc in sorted_docs]
+    # Split each document's content into chunks
+    chunked_documents = []
+    for doc in documents:
+        chunks = text_splitter.split_text(doc.page_content)
+        for chunk in chunks:
+            chunked_doc = Document(
+                page_content=chunk,
+                metadata=doc.metadata
+            )
+            chunked_documents.append(chunked_doc)
 
+    # Set the retriever to return fewer chunks
+    retriever = vector_store.as_retriever(search_kwargs={"k": 3})
+
+    # Initialize the ChatOpenAI model with the provided API key
     gpt4 = ChatOpenAI(model="gpt-4", openai_api_key=openai_api_key, max_tokens=500)
+    qa_chain = RetrievalQA.from_chain_type(
+        llm=gpt4,
+        chain_type="stuff",
+        retriever=retriever,
+        return_source_documents=True
+    )
 
-    def generate_response(query):
-        context = "\n\n".join(retrieve_similar_documents(query, k=3))
-        prompt = f"Context: {context}\n\nQuestion: {query}\nAnswer:"
-        answer = gpt4(prompt)
-        return answer
+    # Define the response generation function
+    def generate_response(input_text):
+        result = qa_chain({"query": input_text})
+        return result["result"], result["source_documents"]
 
-    # Streamlit UI for user input
+    # Form for user input
     with st.form("my_form"):
         text = st.text_area("Ask a question about the University of Chicago MSADS Program!")
         submitted = st.form_submit_button("Submit")
         
         if submitted:
-            answer = generate_response(text)
+            # Generate response and sources
+            answer, source_documents = generate_response(text)
+            
+            # Display the answer
             st.write("**Answer:**", answer)
+            
+            # Display unique sources
+            st.write("**Sources:**")
+            unique_sources = set(doc.metadata["source"] for doc in source_documents)
+            for source in unique_sources:
+                st.write(source)
 else:
     st.warning("Please enter your OpenAI API Key to proceed.")
