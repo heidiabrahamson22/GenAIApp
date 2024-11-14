@@ -137,8 +137,17 @@ if openai_api_key:
     # Initialize embedding model with the provided API key
     embedding_model = OpenAIEmbeddings(openai_api_key=openai_api_key)
 
-    # Use embedding model with FAISS
-    vector_store = InMemoryDocstore.from_documents(documents, embedding_model)
+    # Manually store vectors and documents in memory
+    vector_store = {}
+    
+    # Function to add documents to the vector store
+    def add_documents_to_store(documents, embedding_model):
+        for doc in documents:
+            vector = embedding_model.embed_query(doc.page_content)
+            vector_store[doc] = vector
+    
+    # Add documents to the vector store
+    add_documents_to_store(documents, embedding_model)
 
     # Initialize text splitter
     text_splitter = RecursiveCharacterTextSplitter(
