@@ -143,7 +143,8 @@ if openai_api_key:
     def add_documents_to_store(documents, embedding_model):
         for doc in documents:
             vector = embedding_model.embed_query(doc.page_content)
-            vector_store[doc] = vector
+            # Use a unique attribute, such as title, as the key
+            vector_store[doc.metadata["title"]] = vector
     
     # Add documents to the vector store
     add_documents_to_store(documents, embedding_model)
