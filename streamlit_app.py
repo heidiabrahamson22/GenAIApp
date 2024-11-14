@@ -3,7 +3,6 @@ from bs4 import BeautifulSoup
 import json
 from langchain.schema import Document
 import os
-from langchain.vectorstores import InMemoryDocstore
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 import streamlit as st
