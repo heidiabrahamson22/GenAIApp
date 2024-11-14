@@ -1,0 +1,8 @@
+requests
+beautifulsoup4
+jsonschema  # Handles JSON validation, often required for JSON imports
+langchain  # LangChain core library
+langchain_openai  # If `langchain_openai` is a separate package, include it; otherwise, it may be part of LangChain
+openai  # Required for OpenAIEmbeddings if using OpenAI API
+faiss-cpu  # FAISS library for CPU usage (adjust to faiss-gpu if needed)
+streamlit
