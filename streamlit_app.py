@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 import json
 from langchain.schema import Document
 import os
-from langchain.vectorstores import FAISS
+from langchain.vectorstores import Chroma
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 import streamlit as st
@@ -138,7 +138,7 @@ if openai_api_key:
     embedding_model = OpenAIEmbeddings(openai_api_key=openai_api_key)
 
     # Use embedding model with FAISS
-    vector_store = FAISS.from_documents(documents, embedding_model)
+    vector_store = Chroma.from_documents(documents, embedding_model)
 
     # Initialize text splitter
     text_splitter = RecursiveCharacterTextSplitter(
