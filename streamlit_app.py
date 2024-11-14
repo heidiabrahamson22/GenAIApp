@@ -166,8 +166,24 @@ if openai_api_key:
             )
             chunked_documents.append(chunked_doc)
 
-    # Set the retriever to return fewer chunks
-    retriever = vector_store.as_retriever(search_kwargs={"k": 3})
+    # Simple retrieval function to find the top k most similar documents
+    def retrieve_similar_documents(query, k=3):
+        query_vector = embedding_model.embed_query(query)
+        similarities = []
+        for title, data in vector_store.items():
+            similarity = np.dot(query_vector, data["vector"])  # Cosine similarity or dot product
+            similarities.append((title, data["content"], similarity))
+        
+        # Sort by similarity and get the top k results
+        sorted_docs = sorted(similarities, key=lambda x: x[2], reverse=True)[:k]
+        return [doc[1] for doc in sorted_docs]  # Return the content of the top documents
+
+    # Usage in Streamlit
+    query = st.text_input("Ask a question:")
+    if query:
+        top_documents = retrieve_similar_documents(query, k=3)
+        for doc in top_documents:
+            st.write(doc)
 
     # Initialize the ChatOpenAI model with the provided API key
     gpt4 = ChatOpenAI(model="gpt-4", openai_api_key=openai_api_key, max_tokens=500)
