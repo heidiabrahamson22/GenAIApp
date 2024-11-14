@@ -6,4 +6,4 @@ langchain_openai  # If `langchain_openai` is a separate package, include it; oth
 openai  # Required for OpenAIEmbeddings if using OpenAI API
 streamlit
 langchain-community  # Adding the required community extension
-
+chromadb
