@@ -206,7 +206,21 @@ if openai_api_key:
 
     # Set the retriever to return fewer chunks
     retriever = vector_store.as_retriever(search_kwargs={"k": 3})
-
+    # Step 7: Function to query with similarity score filtering
+    def query_with_improved_selection(query):
+        # Retrieve documents based on query
+        retrieved_docs = retriever.get_relevant_documents(query)
+        
+        # Assume similarity scores are available; if not, FAISS can provide distance metrics.
+        # Filter chunks by the top 25% based on similarity score or distance metric.
+        scores = [doc.metadata.get('similarity_score', 0) for doc in retrieved_docs]
+        threshold = np.percentile(scores, 75)  # Keep top 25% by score
+        selected_docs = [doc for doc, score in zip(retrieved_docs, scores) if score >= threshold]
+        
+        # Run the QA chain with filtered documents
+        result = qa_chain({"query": query, "retrieved_documents": selected_docs})
+        return result["result"], result["source_documents"]
+    
     # Initialize the ChatOpenAI model with the provided API key
     gpt4 = ChatOpenAI(model="gpt-4", openai_api_key=openai_api_key, max_tokens=500)
     qa_chain = RetrievalQA.from_chain_type(
@@ -215,19 +229,20 @@ if openai_api_key:
         retriever=retriever,
         return_source_documents=True
     )
-
+    
     # Define the response generation function
     def generate_response(input_text):
-        result = qa_chain({"query": input_text})
-        return result["result"], result["source_documents"]
-
-    # Form for user input
+        # Call query_with_improved_selection instead of the default QA retrieval
+        answer, source_documents = query_with_improved_selection(input_text)
+        return answer, source_documents
+    
+    # Form for user input in Streamlit
     with st.form("my_form"):
         text = st.text_area("Ask a question about the University of Chicago MSADS Program!")
         submitted = st.form_submit_button("Submit")
         
         if submitted:
-            # Generate response and sources
+            # Generate response and sources using the improved selection function
             answer, source_documents = generate_response(text)
             
             # Display the answer
