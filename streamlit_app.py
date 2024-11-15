@@ -241,7 +241,7 @@ if openai_api_key:
 
     
     # Initialize the ChatOpenAI model with the provided API key
-    gpt4 = ChatOpenAI(model="gpt-4", openai_api_key=openai_api_key, max_tokens=1000, temperature = 0.7)
+    gpt4 = ChatOpenAI(model="gpt-4-turbo", openai_api_key=openai_api_key, max_tokens=1000, temperature = 0.7)
     qa_chain = RetrievalQA.from_chain_type(
         llm=gpt4,
         chain_type="stuff",
