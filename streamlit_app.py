@@ -62,7 +62,7 @@ for title, url in urls.items():
     all_data.append(page_content)
 
 url = "https://www.chicagobooth.edu/mba/joint-degree/mba-ms-applied-data-science"
-response = requests.get(url,headers=headers))
+response = requests.get(url,headers=headers)
 response.raise_for_status()
 soup = BeautifulSoup(response.text, 'html.parser')
 
@@ -83,7 +83,7 @@ all_data.append(booth_data)
 
 def scrape_faqs(url):
     # Send a GET request to the URL
-    response = requests.get(url,headers=headers))
+    response = requests.get(url,headers=headers)
     response.raise_for_status()  # Ensure the request was successful
 
     # Parse the HTML content
@@ -128,7 +128,7 @@ faq_content = scrape_faqs(faq_url)
 
 all_data.append(faq_content)
 
-response = requests.get('https://datascience.uchicago.edu/education/masters-programs/online-program/',headers=headers))
+response = requests.get('https://datascience.uchicago.edu/education/masters-programs/online-program/',headers=headers)
 response.raise_for_status()
 soup = BeautifulSoup(response.text, 'html.parser')
 
