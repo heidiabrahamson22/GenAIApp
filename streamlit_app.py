@@ -232,7 +232,7 @@ if openai_api_key:
         formatted_query = prompt.format(query=query)
     
         # Run the QA chain with filtered documents and formatted prompt
-        result = qa_chain({"query": formatted_query, "retrieved_documents": selected_docs})
+        result = qa_chain({"query": query, "retrieved_documents": selected_docs})
         return result["result"], result["source_documents"]
 
     
