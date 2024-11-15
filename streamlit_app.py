@@ -9,6 +9,7 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 import streamlit as st
 from langchain_openai import ChatOpenAI
 from langchain.chains import RetrievalQA
+import numpy as np
 
 
 # URLs to scrape
