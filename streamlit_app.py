@@ -27,9 +27,13 @@ urls = {
     "Faculty, Instructors, Staff": "https://datascience.uchicago.edu/education/masters-programs/ms-in-applied-data-science/instructors-staff/"
 }
 
+headers = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+}
+
 # Function to scrape each page and combine all text
 def scrape_page_combined(url,title):
-    response = requests.get(url)
+    response = requests.get(url,headers=headers))
     response.raise_for_status()
     soup = BeautifulSoup(response.text, 'html.parser')
 
@@ -58,7 +62,7 @@ for title, url in urls.items():
     all_data.append(page_content)
 
 url = "https://www.chicagobooth.edu/mba/joint-degree/mba-ms-applied-data-science"
-response = requests.get(url)
+response = requests.get(url,headers=headers))
 response.raise_for_status()
 soup = BeautifulSoup(response.text, 'html.parser')
 
@@ -79,7 +83,7 @@ all_data.append(booth_data)
 
 def scrape_faqs(url):
     # Send a GET request to the URL
-    response = requests.get(url)
+    response = requests.get(url,headers=headers))
     response.raise_for_status()  # Ensure the request was successful
 
     # Parse the HTML content
@@ -124,7 +128,7 @@ faq_content = scrape_faqs(faq_url)
 
 all_data.append(faq_content)
 
-response = requests.get('https://datascience.uchicago.edu/education/masters-programs/online-program/')
+response = requests.get('https://datascience.uchicago.edu/education/masters-programs/online-program/',headers=headers))
 response.raise_for_status()
 soup = BeautifulSoup(response.text, 'html.parser')
 
