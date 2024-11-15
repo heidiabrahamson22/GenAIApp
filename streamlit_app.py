@@ -33,7 +33,7 @@ headers = {
 
 # Function to scrape each page and combine all text
 def scrape_page_combined(url,title):
-    response = requests.get(url,headers=headers))
+    response = requests.get(url,headers=headers)
     response.raise_for_status()
     soup = BeautifulSoup(response.text, 'html.parser')
 
