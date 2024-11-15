@@ -206,7 +206,7 @@ if openai_api_key:
             chunked_documents.append(chunked_doc)
 
     # Set the retriever to return fewer chunks
-    retriever = vector_store.as_retriever(search_kwargs={"k": 3})
+    retriever = vector_store.as_retriever(search_kwargs={"k": 5})
 
     # Define a custom prompt template
     prompt_template = """
