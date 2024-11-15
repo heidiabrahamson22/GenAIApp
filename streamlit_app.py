@@ -10,7 +10,7 @@ import streamlit as st
 from langchain_openai import ChatOpenAI
 from langchain.chains import RetrievalQA
 import numpy as np
-
+from langchain.prompts import PromptTemplate
 
 # URLs to scrape
 urls = {
@@ -207,6 +207,17 @@ if openai_api_key:
 
     # Set the retriever to return fewer chunks
     retriever = vector_store.as_retriever(search_kwargs={"k": 3})
+
+    # Define a custom prompt template
+    prompt_template = """
+    You are a knowledgeable assistant with expertise in the University of Chicago MSADS Program. Answer the following question in a clear and informative manner:
+    
+    Question: {query}
+    """
+    
+    # Set up the prompt with the template
+    prompt = PromptTemplate(input_variables=["query"], template=prompt_template)
+
     # Step 7: Function to query with similarity score filtering
     def query_with_improved_selection(query):
         # Retrieve documents based on query
@@ -218,12 +229,15 @@ if openai_api_key:
         threshold = np.percentile(scores, 75)  # Keep top 25% by score
         selected_docs = [doc for doc, score in zip(retrieved_docs, scores) if score >= threshold]
         
-        # Run the QA chain with filtered documents
-        result = qa_chain({"query": query, "retrieved_documents": selected_docs})
+        formatted_query = prompt.format(query=query)
+    
+        # Run the QA chain with filtered documents and formatted prompt
+        result = qa_chain({"query": formatted_query, "retrieved_documents": selected_docs})
         return result["result"], result["source_documents"]
+
     
     # Initialize the ChatOpenAI model with the provided API key
-    gpt4 = ChatOpenAI(model="gpt-4", openai_api_key=openai_api_key, max_tokens=500)
+    gpt4 = ChatOpenAI(model="gpt-4", openai_api_key=openai_api_key, max_tokens=500, temperature = 0.7)
     qa_chain = RetrievalQA.from_chain_type(
         llm=gpt4,
         chain_type="stuff",
