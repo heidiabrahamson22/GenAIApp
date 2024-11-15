@@ -76,6 +76,53 @@ booth_data = {
 
 all_data.append(booth_data)
 
+def scrape_faqs(url):
+    # Send a GET request to the URL
+    response = requests.get(url)
+    response.raise_for_status()  # Ensure the request was successful
+
+    # Parse the HTML content
+    soup = BeautifulSoup(response.text, 'html.parser')
+
+    # Find all accordion items
+    accordion_items = soup.find_all('li', class_='accordion__item')
+
+    # Initialize a list to hold the FAQs
+    faqs = []
+
+    # Iterate over each accordion item
+    for item in accordion_items:
+        # Extract the question
+        question_tag = item.find('a', class_='accordion-title')
+        question = question_tag.get_text(strip=True) if question_tag else 'No question found'
+
+        # Extract the answer from <div> or <p> tags
+        answer_tag = item.find('div', class_='accordion-content') or item.find('p')
+        answer = answer_tag.get_text(strip=True) if answer_tag else 'No answer found'
+
+        # Append the question and answer to the FAQs list
+        faqs.append(f"Q: {question}\nA: {answer}")
+
+    # Combine all FAQs into a single string
+    all_faqs = "\n\n".join(faqs)
+
+    # Create a dictionary with the scraped data
+    faq_data = {
+        "title": "FAQs",
+        "url": url,
+        "content": all_faqs
+    }
+
+    return faq_data
+
+# URL of the FAQs page
+faq_url = "https://datascience.uchicago.edu/education/masters-programs/ms-in-applied-data-science/faqs/"
+
+# Scrape the FAQs
+faq_content = scrape_faqs(faq_url)
+
+all_data.append(faq_content)
+
 response = requests.get('https://datascience.uchicago.edu/education/masters-programs/online-program/')
 response.raise_for_status()
 soup = BeautifulSoup(response.text, 'html.parser')
